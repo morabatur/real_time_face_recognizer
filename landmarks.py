@@ -128,8 +128,8 @@ def run(width, height):
     data.facer = dlib.face_recognition_model_v1('dlib_face_recognition_resnet_model_v1.dat')
 
     data.camera_index = 0
-    data.camera = cv2.VideoCapture(0)
-    # data.camera = cv2.VideoCapture('rtsp://MyHomeRoman:Zibenaht300078789831a@192.168.1.44:554/stream1')
+    # data.camera = cv2.VideoCapture(0)
+    data.camera = cv2.VideoCapture('rtsp://MyHomeRoman:Zibenaht300078789831a@192.168.1.44:554/stream1')
     data.width = width
     data.height = height
 
