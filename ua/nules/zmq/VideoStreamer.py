@@ -23,5 +23,6 @@ while True:
     start_time = time.time()
     ret, frame = cap.read()
     videoStreamSocket.send_pyobj(frame)
+    cv2.imshow('video', frame)
     print("--- %s seconds ---" % (time.time() - start_time))
 

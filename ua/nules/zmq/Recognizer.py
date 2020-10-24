@@ -5,6 +5,8 @@ import face_recognition
 import numpy as np
 import os
 import time
+from datetime import datetime
+
 
 
 def grab_photos(image_dir: str):
@@ -49,8 +51,8 @@ context = zmq.Context()
 videoStreamSocket = context.socket(zmq.PULL)
 videoStreamSocket.connect("tcp://127.0.0.1:5560")
 
-faceRecognitionSocket = context.socket(zmq.PUSH)
-faceRecognitionSocket.bind("tcp://127.0.0.1:5564")
+# faceRecognitionSocket = context.socket(zmq.PUSH)
+# faceRecognitionSocket.bind("tcp://127.0.0.1:5564")
 
 while True:
     start_time = time.time()
@@ -85,6 +87,11 @@ while True:
         # cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
         font = cv2.FONT_HERSHEY_DUPLEX
         cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
+        now = datetime.now()  # current date and time
 
-        faceRecognitionSocket.send_pyobj(frame)
-        print("--- %s seconds ---" % (time.time() - start_time))
+        # cv2.putText(frame, str(now.strftime("%H:%M:%S")), (0 + 6, 0 - 6), font, 1.0, (255, 255, 255), 1)
+
+        # faceRecognitionSocket.send_pyobj(frame)
+
+    # cv2.imshow('video', frame)
+    print("--- %s seconds ---" % (time.time() - start_time))
