@@ -11,7 +11,7 @@ from PyQt5.QtGui import QImage, QPixmap
 from ua.nules.ui.GUI import Ui_MainWindow
 from PyQt5 import QtWidgets
 
-import face_recognition
+from draft import face_recognition
 import numpy as np
 
 def grab_photos(image_dir: str):
@@ -55,12 +55,13 @@ known_face_names, known_face_encodings = grab_photos('../../../trainer_images')
 class Thread(QThread):
     context = zmq.Context()
     faceRecognitionSocket = context.socket(zmq.PULL)
-    faceRecognitionSocket.connect("tcp://127.0.0.1:5564")
+    faceRecognitionSocket.connect("tcp://127.0.0.1:5560")
 
     changePixmap = pyqtSignal(QImage)
 
     def run(self):
         video_capture = cv2.VideoCapture(0)
+        name = "Unknown"
 
         while True:
             start_time = time.time()
@@ -81,13 +82,6 @@ class Thread(QThread):
                 print('matches', matches)
                 print('-----------------')
 
-                name = "Unknown"
-
-                # If a match was found in known_face_encodings, just use the first one.
-                # if True in matches:
-                #     first_match_index = matches.index(True)
-                #     name = known_face_names[first_match_index]
-
                 # Or instead, use the known face with the smallest distance to the new face
                 face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
                 best_match_index = np.argmin(face_distances)
@@ -103,17 +97,10 @@ class Thread(QThread):
                 cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
 
 
-            # ===============
-            # frame = self.faceRecognitionSocket.recv_pyobj()
-            # if ret:
-            # https://stackoverflow.com/a/55468544/6622587
-            # rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            # h, w, ch = rgbImage.shape
             h, w, ch = frame.shape
             bytesPerLine = ch * w
-            # convertToQtFormat = QImage(frame.data, w, h, bytesPerLine, QImage.Format_RGB888)
             convertToQtFormat = QImage(frame.data, w, h, bytesPerLine, QImage.Format_BGR888)
-            # p = convertToQtFormat.scaled(400, 400, Qt.KeepAspectRatio)
+            # p = convertToQtFormat.scaled(711, 631, Qt.KeepAspectRatio) unnecessary
             self.changePixmap.emit(convertToQtFormat)
             print("--- %s seconds ---" % (time.time() - start_time))
 

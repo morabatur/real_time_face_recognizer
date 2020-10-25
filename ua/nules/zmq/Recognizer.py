@@ -1,7 +1,7 @@
 import cv2
 import zmq
 import pickle
-import face_recognition
+from draft import face_recognition
 import numpy as np
 import os
 import time

@@ -1,6 +1,6 @@
 import os
 
-import face_recognition
+from draft import face_recognition
 
 
 class ImageLoader(object):

@@ -5,9 +5,9 @@ import time
 
 cap = cv2.VideoCapture(0)
 detector = dlib.get_frontal_face_detector()
-context = zmq.Context()
-videoStreamSocket = context.socket(zmq.PUSH)
-videoStreamSocket.bind("tcp://127.0.0.1:5560")
+# context = zmq.Context()
+# videoStreamSocket = context.socket(zmq.PUSH)
+# videoStreamSocket.bind("udp://127.0.0.1:5560")
 
 
 def skip_frame(frame_number: int, cap: object):
@@ -22,7 +22,7 @@ def skip_frame(frame_number: int, cap: object):
 while True:
     start_time = time.time()
     ret, frame = cap.read()
-    videoStreamSocket.send_pyobj(frame)
+    # videoStreamSocket.send_pyobj(frame)
     cv2.imshow('video', frame)
     print("--- %s seconds ---" % (time.time() - start_time))
 

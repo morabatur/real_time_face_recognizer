@@ -1,7 +1,7 @@
 import os
 import time
 
-import face_recognition
+from draft import face_recognition
 import cv2
 import numpy as np
 
@@ -24,7 +24,7 @@ def grab_photos(image_dir: str):
     return photos_names, photos_encodings
 
 
-known_face_names, known_face_encodings = grab_photos('trainer_images')
+known_face_names, known_face_encodings = grab_photos('../trainer_images')
 video_capture = cv2.VideoCapture(0)
 # video_capture = cv2.VideoCapture('rtsp://MyHomeRoman:Zibenaht300078789831a@192.168.1.45:554/stream1')
 
