@@ -5,6 +5,7 @@ import zmq
 from server.model.FaceModel import FaceModel
 from server.model.Camera import Camera
 from server.model.SenderManager import SenderManager
+from server.model.UdpSender import UdpSender
 
 import cv2
 import numpy as np
@@ -20,9 +21,10 @@ class RstpThread(Thread):
         self.sender_manager = sender_manager
 
     def run(self):
-        context = zmq.Context()
-        videoStreamSocket = context.socket(zmq.PUSH)
-        videoStreamSocket.bind("tcp://127.0.0.1:5560")
+        sender = UdpSender('localhost', 8089)
+        # context = zmq.Context()
+        # videoStreamSocket = context.socket(zmq.PUSH)
+        # videoStreamSocket.bind("tcp://127.0.0.1:5560")
 
         video_capture = cv2.VideoCapture(self.camera.get_connect_url())
 
@@ -30,8 +32,8 @@ class RstpThread(Thread):
 
         while (True):
             ret, frame = video_capture.read()
-            # cv2.imshow('video', frame)
-            videoStreamSocket.send_pyobj(frame)
+
+            # videoStreamSocket.send_pyobj(frame)
             # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
             rgb_frame = frame[:, :, ::-1]
 
@@ -53,6 +55,7 @@ class RstpThread(Thread):
                 print('detected person: ' + name)
 
                 if self.sender_manager.get_stream_ip() == self.camera.ip:
+                    print('here')
                     # Draw a box around the face
                     cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
 
@@ -61,7 +64,9 @@ class RstpThread(Thread):
                     font = cv2.FONT_HERSHEY_DUPLEX
                     cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
 
-            # if self.sender_manager.get_stream_ip() == self.camera.ip:
-            # cv2.imshow('video', rgb_frame)
+            if self.sender_manager.get_stream_ip() == self.camera.ip:
+                print('here2')
+                sender.send_data(frame)
+                print('here3')
 
-            # TODO add upd sender
+

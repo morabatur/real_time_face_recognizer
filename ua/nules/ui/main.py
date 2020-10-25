@@ -1,109 +1,66 @@
-import pickle
 import sys
 import time
-import os
-
-import zmq
-import cv2
+import pickle
+import socket
+import struct
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QImage, QPixmap
 
 from ua.nules.ui.GUI import Ui_MainWindow
 from PyQt5 import QtWidgets
 
-from draft import face_recognition
-import numpy as np
-
-def grab_photos(image_dir: str):
-    photos_names = []
-    photos_encodings = []
-    for root, dirs, files in os.walk(image_dir):
-        for file in files:
-            if file.endswith('png') or file.endswith('jpg'):
-                name_for_photo = root.split("\\")[1]
-                path = os.path.join(root, file)
-
-                image = face_recognition.load_image_file(path)
-                photos_encoding = face_recognition.face_encodings(image)[0]
-
-                photos_encodings.append(photos_encoding)
-                photos_names.append(name_for_photo)
-
-    return photos_names, photos_encodings
-
-trainer_images_dir = '../../../trainer_images'
-face_names_pickle = '%s/known_face_names.pickle' % trainer_images_dir
-face_encodings_pickle = '%s/known_face_encodings.pickle' % trainer_images_dir
-
-if os.path.exists(face_names_pickle) & os.path.exists(face_encodings_pickle):
-    with open(face_names_pickle, 'rb') as f:
-        known_face_names = pickle.load(f)
-        print('load known_face_names')
-    with open(face_encodings_pickle, 'rb') as f:
-        known_face_encodings = pickle.load(f)
-        print('load known_face_encodings')
-else:
-    known_face_names, known_face_encodings = grab_photos('%s' % trainer_images_dir)
-    with open(face_names_pickle, 'wb') as f:
-        pickle.dump(known_face_names, f)
-    with open(face_encodings_pickle, 'wb') as f:
-        pickle.dump(known_face_encodings, f)
-
-
-known_face_names, known_face_encodings = grab_photos('../../../trainer_images')
 
 class Thread(QThread):
-    context = zmq.Context()
-    faceRecognitionSocket = context.socket(zmq.PULL)
-    faceRecognitionSocket.connect("tcp://127.0.0.1:5560")
 
     changePixmap = pyqtSignal(QImage)
 
     def run(self):
-        video_capture = cv2.VideoCapture(0)
-        name = "Unknown"
+        HOST = ''
+        PORT = 8089
+
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        print('Socket created')
+
+        s.bind((HOST, PORT))
+        print('Socket bind complete')
+        s.listen(10)
+        print('Socket now listening')
+
+        conn, addr = s.accept()
+
+        data = b''
+        payload_size = struct.calcsize("L")
 
         while True:
             start_time = time.time()
-            ret, frame = video_capture.read()
 
-            # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
-            rgb_frame = frame[:, :, ::-1]
+            try:
+                # Retrieve message size
+                while len(data) < payload_size:
+                    data += conn.recv(4096)
 
-            # Find all the faces and face enqcodings in the frame of video
-            face_locations = face_recognition.face_locations(rgb_frame)
-            face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
+                packed_msg_size = data[:payload_size]
+                data = data[payload_size:]
+                msg_size = struct.unpack("L", packed_msg_size)[0]  ### CHANGED
 
-            # Loop through each face in this frame of video
-            for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
-                # See if the face is a match for the known face(s)
-                matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
+                # Retrieve all data based on message size
+                while len(data) < msg_size:
+                    data += conn.recv(4096)
 
-                print('matches', matches)
-                print('-----------------')
+                frame_data = data[:msg_size]
+                data = data[msg_size:]
 
-                # Or instead, use the known face with the smallest distance to the new face
-                face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
-                best_match_index = np.argmin(face_distances)
-                if matches[best_match_index]:
-                    name = known_face_names[best_match_index]
+                # Extract frame
+                frame = pickle.loads(frame_data)
 
-                # Draw a box around the face
-                cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
-
-                # Draw a label with a name below the face
-                cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
-                font = cv2.FONT_HERSHEY_DUPLEX
-                cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
-
-
-            h, w, ch = frame.shape
-            bytesPerLine = ch * w
-            convertToQtFormat = QImage(frame.data, w, h, bytesPerLine, QImage.Format_BGR888)
-            # p = convertToQtFormat.scaled(711, 631, Qt.KeepAspectRatio) unnecessary
-            self.changePixmap.emit(convertToQtFormat)
-            print("--- %s seconds ---" % (time.time() - start_time))
-
+                h, w, ch = frame.shape
+                bytesPerLine = ch * w
+                convertToQtFormat = QImage(frame.data, w, h, bytesPerLine, QImage.Format_BGR888)
+                # p = convertToQtFormat.scaled(711, 631, Qt.KeepAspectRatio) unnecessary
+                self.changePixmap.emit(convertToQtFormat)
+                print("--- %s seconds ---" % (time.time() - start_time))
+            except BaseException:
+                print('Exceprion')
 
 class CurrentProgram(QtWidgets.QMainWindow):
     def __init__(self):
