@@ -70,13 +70,13 @@ sender_manager = SenderManager()
 thread_runner = RstpThreadRunner()
 
 
-@app.route('/streaming/<camera_ip>', methods=['PUT'])
+@app.route('/streaming/<camera_ip>', methods=['GET'])
 def start_streaming(camera_ip):
     sender_manager.set_stream_ip(camera_ip)
     return jsonify(sender_manager.get_stream_ip())
 
 
-@app.route('/rtsp/start/<camera_id>', methods=['POST'])
+@app.route('/rtsp/start/<camera_id>', methods=['GET'])
 def start_rtsp_streaming(camera_id):
     camera = Camera.query.get(camera_id)
     model = FaceModel()

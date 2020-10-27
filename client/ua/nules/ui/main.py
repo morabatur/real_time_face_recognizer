@@ -3,6 +3,7 @@ import time
 import pickle
 import socket
 import struct
+import requests
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QImage, QPixmap
 
@@ -78,6 +79,12 @@ class CurrentProgram(QtWidgets.QMainWindow):
 
 app = QtWidgets.QApplication([])
 application = CurrentProgram()
+
+# Initialize server streaming
+# server_url = 'http://127.0.0.1:5000'
+# requests.get('%s/rtsp/start/0' % server_url) # run thread with video streaming from LOCAL camera
+#
+# response = requests.get('%s/streaming/local' % server_url) #start streaming in client from LOCAL camera
 
 application.show()
 

@@ -27,7 +27,7 @@ class FaceModel(object):
         return photos_names, photos_encodings
 
     def load(self):
-        trainer_images_dir = '../../trainer_images'
+        trainer_images_dir = 'C:/Users/rcher/PycharmProjects/diploma/trainer_images'
         face_names_pickle = '%s/known_face_names.pickle' % trainer_images_dir
         face_encodings_pickle = '%s/known_face_encodings.pickle' % trainer_images_dir
 
