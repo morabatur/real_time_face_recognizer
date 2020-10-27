@@ -1,8 +1,8 @@
 from server.model.Camera import Camera
 from server.model.CameraMap import CameraMap
 from server.model.FaceModel import FaceModel
-from server.model.RstpThread import RstpThread
-from server.model.RstpThreadRunner import RstpThreadRunner
+from server.threads.RstpThread import RstpThread
+from server.threads.RstpThreadRunner import RstpThreadRunner
 from server.model.SenderManager import SenderManager
 
 

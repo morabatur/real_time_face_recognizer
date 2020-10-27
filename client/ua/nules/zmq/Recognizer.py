@@ -28,7 +28,7 @@ def grab_photos(image_dir: str):
     return photos_names, photos_encodings
 
 
-trainer_images_dir = '../../../trainer_images'
+trainer_images_dir = '../../../../trainer_images'
 face_names_pickle = '%s/known_face_names.pickle' % trainer_images_dir
 face_encodings_pickle = '%s/known_face_encodings.pickle' % trainer_images_dir
 

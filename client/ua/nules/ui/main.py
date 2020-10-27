@@ -6,7 +6,7 @@ import struct
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QImage, QPixmap
 
-from ua.nules.ui.GUI import Ui_MainWindow
+from client.ua.nules.ui.GUI import Ui_MainWindow
 from PyQt5 import QtWidgets
 
 

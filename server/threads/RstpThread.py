@@ -1,11 +1,9 @@
 from threading import Thread
 
-import zmq
-
 from server.model.FaceModel import FaceModel
 from server.model.Camera import Camera
 from server.model.SenderManager import SenderManager
-from server.model.UdpSender import UdpSender
+from server.udp.UdpSender import UdpSender
 
 import cv2
 import numpy as np
@@ -22,9 +20,6 @@ class RstpThread(Thread):
 
     def run(self):
         sender = UdpSender('localhost', 8089)
-        # context = zmq.Context()
-        # videoStreamSocket = context.socket(zmq.PUSH)
-        # videoStreamSocket.bind("tcp://127.0.0.1:5560")
 
         video_capture = cv2.VideoCapture(self.camera.get_connect_url())
 
