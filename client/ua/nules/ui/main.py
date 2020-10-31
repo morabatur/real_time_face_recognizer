@@ -3,7 +3,8 @@ import time
 import pickle
 import socket
 import struct
-import requests
+from client.ua.nules.api import ServerApi
+from PyQt5 import QtCore
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QImage, QPixmap
 
@@ -68,6 +69,8 @@ class CurrentProgram(QtWidgets.QMainWindow):
         super(CurrentProgram, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.init_camera_buttons()
+        # self.ui.camera_button.clicked.connect(printText)
         th = Thread(self)
         th.changePixmap.connect(self.setImage)
         th.start()
@@ -75,6 +78,58 @@ class CurrentProgram(QtWidgets.QMainWindow):
     @pyqtSlot(QImage)
     def setImage(self, image):
         self.ui.frame_label.setPixmap(QPixmap.fromImage(image))
+
+
+    def init_camera_buttons(self):
+        api = ServerApi('http://127.0.0.1:5000')
+        res = api.get('/camera')
+
+        for camera in res:
+            self.addButton(camera)
+
+
+    def addButton(self, camera):
+        _translate = QtCore.QCoreApplication.translate
+        camera_widget = QtWidgets.QWidget(self.ui.camera_scroll_area_widget_contents)
+        # camera_widget.setObjectName("camera_widget")
+
+        horizontalLayout_3 = QtWidgets.QHBoxLayout(camera_widget)
+        # horizontalLayout_3.setObjectName("horizontalLayout_3")
+
+        # left_line = QtWidgets.QFrame(camera_widget)
+        # left_line.setFrameShape(QtWidgets.QFrame.VLine)
+        # left_line.setFrameShadow(QtWidgets.QFrame.Sunken)
+        # left_line.setObjectName("left_line")
+
+        # horizontalLayout_3.addWidget(left_line)
+
+        camera_button = QtWidgets.QPushButton(camera_widget)
+        camera_button.setObjectName("camera_button" + camera.get('ip'))
+        camera_button.setProperty('id', camera)
+        camera_button.released.connect(self.button_released)
+
+        horizontalLayout_3.addWidget(camera_button)
+
+        # right_line = QtWidgets.QFrame(camera_widget)
+        # right_line.setFrameShape(QtWidgets.QFrame.VLine)
+        # right_line.setFrameShadow(QtWidgets.QFrame.Sunken)
+        # right_line.setObjectName("right_line")
+
+        # horizontalLayout_3.addWidget(right_line)
+
+        self.ui.horizontalLayout_2.addWidget(camera_widget)
+        camera_button.setText(_translate("MainWindow", "Camera \n" + camera.get('ip')))
+
+
+    def button_released(self):
+        # api = ServerApi('http://127.0.0.1:5000')
+        # res = api.get('/camera')
+        # print(res)
+
+        sending_button = self.sender()
+        print('%s Clicked!' % str(sending_button.objectName()))
+        print('%s Clicked!' % str(sending_button.property('id')))
+
 
 
 app = QtWidgets.QApplication([])
