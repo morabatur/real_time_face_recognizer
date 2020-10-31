@@ -52,6 +52,8 @@ class Ui_MainWindow(object):
         self.faces_scroll_area_widget_contents.setObjectName("faces_scroll_area_widget_contents")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.faces_scroll_area_widget_contents)
         self.verticalLayout.setObjectName("verticalLayout")
+
+
         self.person_widget = QtWidgets.QWidget(self.faces_scroll_area_widget_contents)
         self.person_widget.setObjectName("person_widget")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.person_widget)
@@ -74,7 +76,9 @@ class Ui_MainWindow(object):
         self.down_line.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.down_line.setObjectName("down_line")
         self.verticalLayout_2.addWidget(self.down_line)
-        self.verticalLayout.addWidget(self.person_widget)
+        self.verticalLayout. addWidget(self.person_widget)
+
+
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem)
         self.faces_scroll_area.setWidget(self.faces_scroll_area_widget_contents)

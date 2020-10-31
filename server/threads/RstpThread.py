@@ -36,6 +36,7 @@ class RstpThread(Thread):
             face_locations = face_recognition.face_locations(rgb_frame)
             face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
 
+            face_coordinates = []
             # Loop through each face in this frame of video
             for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
                 # See if the face is a match for the known face(s)
@@ -44,24 +45,26 @@ class RstpThread(Thread):
                 # Or instead, use the known face with the smallest distance to the new face
                 face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
                 best_match_index = np.argmin(face_distances)
+                name = 'undefined'
                 if matches[best_match_index]:
                     name = known_face_names[best_match_index]
 
                 print('detected person: ' + name)
-
-                if self.sender_manager.get_stream_ip() == self.camera.ip:
-                    print('here')
-                    # Draw a box around the face
-                    cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
-
-                    # Draw a label with a name below the face
-                    cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
-                    font = cv2.FONT_HERSHEY_DUPLEX
-                    cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
+                face_coordinates.append((name, top, right, bottom, left))
+                # if self.sender_manager.get_stream_ip() == self.camera.ip:
+                #     print('here')
+                #     # Draw a box around the face
+                #     cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
+                #
+                #     # Draw a label with a name below the face
+                #     cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
+                #     font = cv2.FONT_HERSHEY_DUPLEX
+                #     cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
 
             if self.sender_manager.get_stream_ip() == self.camera.ip:
                 print('here2')
-                sender.send_data(frame)
+                data = [frame, face_coordinates]
+                sender.send_data(data)
                 print('here3')
 
 

@@ -21,4 +21,6 @@ class UdpSender(object):
             # Then send data
             self.clientsocket.sendall(message_size + data)
         except BaseException:
-            print('EXCEPRION')
+            print('EXCEPRION, try reconnect')
+            # self.clientsocket.connect((self.ip, self.port))
+
