@@ -1,6 +1,7 @@
 import socket
 import pickle
 import struct
+import time
 
 
 class UdpSender(object):
@@ -22,5 +23,7 @@ class UdpSender(object):
             self.clientsocket.sendall(message_size + data)
         except BaseException:
             print('EXCEPRION, try reconnect')
-            # self.clientsocket.connect((self.ip, self.port))
+            time.sleep(3)
+            self.clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.clientsocket.connect((self.ip, self.port))
 

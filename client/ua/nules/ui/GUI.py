@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1027, 862)
+        MainWindow.resize(999, 862)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.line = QtWidgets.QFrame(self.centralwidget)
@@ -35,7 +35,7 @@ class Ui_MainWindow(object):
         self.label.setGeometry(QtCore.QRect(440, 660, 55, 16))
         self.label.setObjectName("label")
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
-        self.label_2.setGeometry(QtCore.QRect(850, 10, 55, 16))
+        self.label_2.setGeometry(QtCore.QRect(834, 10, 71, 20))
         self.label_2.setObjectName("label_2")
         self.faces_scroll_area = QtWidgets.QScrollArea(self.centralwidget)
         self.faces_scroll_area.setGeometry(QtCore.QRect(760, 40, 241, 611))
@@ -52,37 +52,9 @@ class Ui_MainWindow(object):
         self.faces_scroll_area_widget_contents.setObjectName("faces_scroll_area_widget_contents")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.faces_scroll_area_widget_contents)
         self.verticalLayout.setObjectName("verticalLayout")
-
-
-        self.person_widget = QtWidgets.QWidget(self.faces_scroll_area_widget_contents)
-        self.person_widget.setObjectName("person_widget")
-        self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.person_widget)
-        self.verticalLayout_2.setObjectName("verticalLayout_2")
-        self.up_line = QtWidgets.QFrame(self.person_widget)
-        self.up_line.setFrameShape(QtWidgets.QFrame.HLine)
-        self.up_line.setFrameShadow(QtWidgets.QFrame.Sunken)
-        self.up_line.setObjectName("up_line")
-        self.verticalLayout_2.addWidget(self.up_line)
-        self.face_img = QtWidgets.QLabel(self.person_widget)
-        self.face_img.setMinimumSize(QtCore.QSize(151, 101))
-        self.face_img.setAlignment(QtCore.Qt.AlignCenter)
-        self.face_img.setObjectName("face_img")
-        self.verticalLayout_2.addWidget(self.face_img)
-        self.name_lbl = QtWidgets.QLabel(self.person_widget)
-        self.name_lbl.setObjectName("name_lbl")
-        self.verticalLayout_2.addWidget(self.name_lbl)
-        self.down_line = QtWidgets.QFrame(self.person_widget)
-        self.down_line.setFrameShape(QtWidgets.QFrame.HLine)
-        self.down_line.setFrameShadow(QtWidgets.QFrame.Sunken)
-        self.down_line.setObjectName("down_line")
-        self.verticalLayout_2.addWidget(self.down_line)
-        self.verticalLayout. addWidget(self.person_widget)
-
-
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem)
         self.faces_scroll_area.setWidget(self.faces_scroll_area_widget_contents)
-
         self.cameras_scroll_area = QtWidgets.QScrollArea(self.centralwidget)
         self.cameras_scroll_area.setGeometry(QtCore.QRect(30, 680, 971, 131))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
@@ -98,16 +70,10 @@ class Ui_MainWindow(object):
         self.camera_scroll_area_widget_contents.setObjectName("camera_scroll_area_widget_contents")
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.camera_scroll_area_widget_contents)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
-
-
-
-
-        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_2.addItem(spacerItem1)
         self.cameras_scroll_area.setWidget(self.camera_scroll_area_widget_contents)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1027, 26))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 999, 26))
         self.menubar.setObjectName("menubar")
         self.menuFile = QtWidgets.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")
@@ -162,9 +128,7 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.label.setText(_translate("MainWindow", "Cameras"))
-        self.label_2.setText(_translate("MainWindow", "Faces"))
-        self.face_img.setText(_translate("MainWindow", "Face image"))
-        self.name_lbl.setText(_translate("MainWindow", "TextLabel"))
+        self.label_2.setText(_translate("MainWindow", "Last faces"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.menutest.setTitle(_translate("MainWindow", "Model"))
         self.menuSettings.setTitle(_translate("MainWindow", "Settings"))

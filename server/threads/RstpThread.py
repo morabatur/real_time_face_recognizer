@@ -28,6 +28,11 @@ class RstpThread(Thread):
         while (True):
             ret, frame = video_capture.read()
 
+            if frame is None:
+                print('LOSS SIGNAL')
+                video_capture = cv2.VideoCapture(self.camera.get_connect_url())
+                continue
+
             # videoStreamSocket.send_pyobj(frame)
             # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
             rgb_frame = frame[:, :, ::-1]
@@ -62,9 +67,7 @@ class RstpThread(Thread):
                 #     cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
 
             if self.sender_manager.get_stream_ip() == self.camera.ip:
-                print('here2')
                 data = [frame, face_coordinates]
                 sender.send_data(data)
-                print('here3')
 
 

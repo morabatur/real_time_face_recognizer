@@ -78,6 +78,7 @@ def start_streaming(camera_ip):
 
 @app.route('/rtsp/start/<camera_id>', methods=['GET'])
 def start_rtsp_streaming(camera_id):
+    print('camera_id ' + camera_id)
     camera = Camera.query.get(camera_id)
     model = FaceModel()
     thread = RstpThread(camera, model, sender_manager)
