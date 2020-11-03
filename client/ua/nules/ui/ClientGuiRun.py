@@ -12,7 +12,10 @@ from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot, Qt
 from PyQt5.QtGui import QImage, QPixmap
 
+from client.ua.nules.ui.CameraList import CameraList
+from client.ua.nules.ui.FacesList import FacesList
 from client.ua.nules.ui.GUI import Ui_MainWindow
+from client.ua.nules.ui.CameraDialog import CameraDialog
 from PyQt5 import QtWidgets
 
 from queue import Queue
@@ -164,45 +167,17 @@ class CurrentProgram(QtWidgets.QMainWindow):
         self.th = Thread(self)
         self.th.changePixmap.connect(self.setImage)
         self.th.start()
+        cameraDialog = CameraDialog()
+        cameraList = CameraList()
+        facesList = FacesList()
+        self.ui.actionAdd.triggered.connect(lambda : cameraDialog.show() )
+        self.ui.actionDelete.triggered.connect(lambda : cameraList.show() )
+        self.ui.actionShow_faces.triggered.connect(lambda : facesList.show() )
 
-        self.timer = QtCore.QTimer()
-        self.timer.timeout.connect(self.delete_face)
-        self.timer.start(2000)
+        # self.timer = QtCore.QTimer()
+        # self.timer.timeout.connect(self.delete_face)
+        # self.timer.start(2000)
 
-        self.timer2 = QtCore.QTimer()
-        self.timer2.timeout.connect(self.add_face)
-        self.timer2.start(1000)
-
-    def delete_face(self):
-        # print('run then fin')
-        # print(self.th.isRunning())
-        # print(self.th.isFinished())
-        # print(self.th.isInterruptionRequested())
-
-        # print('delete_face')
-        now = time.time()
-        for k in list(main_widget_names):
-            add_time = main_widget_names[k][0]
-            widget = main_widget_names[k][1]
-            if now - add_time >= 3:
-                # print('delete')
-                widget.setParent(None)
-                main_widget_names.pop(k)
-
-    def add_face(self):
-        # print('add_face')
-        if not main_queue.empty():
-            data = main_queue.get()
-
-            for face in data:
-                name = face[0]
-                frame = face[1]
-                widget = main_widget_names.get(name)
-                # print('widget')
-                print(widget)
-                if widget is None:
-                    # print('not find')
-                    self.add_new_face(name, frame)
 
     @pyqtSlot(QImage)
     def setImage(self, image):
@@ -231,11 +206,34 @@ class CurrentProgram(QtWidgets.QMainWindow):
         camera_button.setProperty('id', camera)
         camera_button.released.connect(self.button_released)
 
+        camera_rtsp_buttom = QtWidgets.QPushButton(camera_widget)
+        camera_rtsp_buttom.setObjectName("camera_rtsp_buttom" + camera.get('ip'))
+        camera_rtsp_buttom.setProperty('id', camera)
+        camera_rtsp_buttom.released.connect(self.rtsp_released)
+
+        horizontalLayout_3.addWidget(camera_rtsp_buttom)
         horizontalLayout_3.addWidget(camera_button)
 
         self.ui.horizontalLayout_2.addWidget(camera_widget)
-        camera_button.setText(_translate("MainWindow", "Camera \n" + camera.get('ip')))
+        camera_button.setText(_translate("MainWindow", "View\n" + camera.get('ip')))
+        camera_rtsp_buttom.setText(_translate("MainWindow", "Start stream"))
 
+
+    def rtsp_released(self):
+
+        sending_button = self.sender()
+        api = ServerApi('http://127.0.0.1:5000')
+
+        if sending_button.text() == 'Start stream':
+            resp = api.rtsp_start(sending_button.property('id').get('id'))
+            print('start rtsp ', str(resp.status_code))
+            if resp.status_code == 200 or resp.status_code == '200':
+                sending_button.setText('Stop stream')
+        else:
+            resp = api.rtsp_finish(sending_button.property('id').get('id'))
+            print('start rtsp ', str(resp.status_code))
+            if resp.status_code == 200 or resp.status_code == '200':
+                sending_button.setText('Start stream')
 
     def button_released(self):
         self.th.new_source_status = 'preinitialize'
@@ -244,13 +242,6 @@ class CurrentProgram(QtWidgets.QMainWindow):
         sending_button = self.sender()
         res = api.get('/streaming/' + str(sending_button.property('id').get('id')))
         self.th.new_source_status = 'reinitialize'
-
-
-        print('%s Clicked!' % str(sending_button.objectName()))
-        print('%s Clicked!' % str(sending_button.property('id')))
-        # self.th.continue_thread()
-
-
 
 
     def add_new_face(self, person_name, frame):

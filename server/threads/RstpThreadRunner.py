@@ -9,6 +9,24 @@ class RstpThreadRunner(object):
 
     def run_rstp_thread(self, thread: Thread, connect_url: str):
         thread_name = str(connect_url)
+        if thread_name in self.threads_id:
+            print('Thread already exist')
+            threads_in_dict = self.threads_id.get(thread_name)
+            if threads_in_dict is None:
+                self.create_thread(thread, thread_name)
+                return 're-created'
+            elif threads_in_dict.stopped():
+                print('thread is runnning status - ' + str(threads_in_dict.stopped()))
+                threads_in_dict.continue_thread()
+                return 'stopped'
+            else:
+                print('try recreate exsisting thread')
+                return 'try-recreate'
+        else:
+            self.create_thread(thread, thread_name)
+            return 'created'
+
+    def create_thread(self, thread, thread_name):
         thread.setName(thread_name)
         self.threads_id[thread_name] = thread
         thread.start()
@@ -28,4 +46,12 @@ class RstpThreadRunner(object):
 
 
     def stop_rstp_thread(self, thread_name):
-        self.threads_id.get(thread_name).stop()
+        self.threads_id.get(str(thread_name)).stop()
+
+    def rtrsp_status(self) -> list:
+        status = []
+        for key, thread_value in self.threads_id.items():
+            item_satus = {'thread_name': key, 'stopped': thread_value.stopped()}
+            status.append(item_satus)
+
+        return status

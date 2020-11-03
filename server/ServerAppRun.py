@@ -80,10 +80,6 @@ def start_udp_streaming(camera_id):
     return jsonify(str('OK'))
 
 
-
-
-
-
 @app.route('/rtsp/start/<camera_id>', methods=['GET'])
 def start_rtsp_streaming(camera_id):
     global udp_sender
@@ -95,6 +91,18 @@ def start_rtsp_streaming(camera_id):
     thread = RstpThread(camera, model, sender_manager, udp_sender)
     thread_runner.run_rstp_thread(thread, camera.get_connect_url())
     return jsonify(str(thread.getName()))
+
+
+@app.route('/rtsp/finish/<camera_id>', methods=['GET'])
+def finish_rtsp_streaming(camera_id):
+    camera = Camera.query.get(camera_id)
+    thread_runner.stop_rstp_thread(camera.get_connect_url())
+    resp = {'thread_name': camera.get_connect_url(), 'stopped': 'True'}
+    return jsonify(resp)\
+
+@app.route('/rtsp/status', methods=['GET'])
+def rtsp_status():
+    return jsonify(thread_runner.rtrsp_status())
 
 
 if __name__ == '__main__':

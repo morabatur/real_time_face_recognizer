@@ -1,4 +1,5 @@
 import threading
+import time
 from threading import Thread
 
 from server.model.FaceModel import FaceModel
@@ -39,6 +40,9 @@ class RstpThread(Thread):
         known_face_names, known_face_encodings = self.face_model.load()
         print('loaded model in ' + str(self.name))
         while (True):
+            if self.stopped():
+                # time.sleep(2)
+                continue
             ret, frame = video_capture.read()
 
             if frame is None:
