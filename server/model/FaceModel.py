@@ -4,10 +4,10 @@ import pickle
 
 
 class FaceModel(object):
-    def __new__(cls):
-        if not hasattr(cls, 'instance'):
-            cls.instance = super(FaceModel, cls).__new__(cls)
-        return cls.instance
+    # def __new__(cls):
+    #     if not hasattr(cls, 'instance'):
+    #         cls.instance = super(FaceModel, cls).__new__(cls)
+    #     return cls.instance
 
     def grab_photos(self, image_dir: str):
         photos_names = []

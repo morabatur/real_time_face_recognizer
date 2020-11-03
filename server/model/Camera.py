@@ -27,5 +27,5 @@ class Camera(db.Model):
 
 class CameraSchema(ma.Schema):
     class Meta:
-        fields = ('ip', 'port', 'user', 'password', 'rtsp_path')
+        fields = ('id', 'ip', 'port', 'user', 'password', 'rtsp_path')
 

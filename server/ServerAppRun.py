@@ -5,10 +5,11 @@ from server.model.FaceModel import FaceModel
 from server.model.SenderManager import SenderManager
 from server.threads.RstpThread import RstpThread
 from server.threads.RstpThreadRunner import RstpThreadRunner
+from server.udp.UdpSender import UdpSender
 
 camera_schema = CameraSchema()
 cameras_schema = CameraSchema(many=True)
-
+udp_sender = None
 
 @app.route('/camera', methods=['POST'])
 def add_camera():
@@ -70,20 +71,30 @@ sender_manager = SenderManager()
 thread_runner = RstpThreadRunner()
 
 
-@app.route('/streaming/<camera_ip>', methods=['GET'])
-def start_streaming(camera_ip):
-    sender_manager.set_stream_ip(camera_ip)
-    return jsonify(sender_manager.get_stream_ip())
+@app.route('/streaming/<camera_id>', methods=['GET'])
+def start_udp_streaming(camera_id):
+    print('start start_udp_streaming from ' + str(camera_id))
+    camera = Camera.query.get(camera_id)
+    thread_name = str(camera.get_connect_url())
+    thread_runner.set_upd_stream(thread_name)
+    return jsonify(str('OK'))
+
+
+
+
 
 
 @app.route('/rtsp/start/<camera_id>', methods=['GET'])
 def start_rtsp_streaming(camera_id):
-    print('camera_id ' + camera_id)
+    global udp_sender
+    print('start_rtsp_streaming with camera_id ' + camera_id)
     camera = Camera.query.get(camera_id)
     model = FaceModel()
-    thread = RstpThread(camera, model, sender_manager)
+    if udp_sender is None:
+        udp_sender = UdpSender('localhost', 8089)
+    thread = RstpThread(camera, model, sender_manager, udp_sender)
     thread_runner.run_rstp_thread(thread, camera.get_connect_url())
-    return jsonify(thread_runner.threads_id)
+    return jsonify(str(thread.getName()))
 
 
 if __name__ == '__main__':

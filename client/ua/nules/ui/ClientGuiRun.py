@@ -26,69 +26,134 @@ main_widget_names = dict()
 class Thread(QThread):
 
     changePixmap = pyqtSignal(QImage)
+    _stop_event = threading.Event()
+    # conn = None
+    new_source_status = 'initialize'
+    satus = False
+    def stop(self):
+        self._stop_event.set()
+
+    def continue_thread(self):
+        self._stop_event.clear()
+
+    def is_stopped(self):
+        return self._stop_event.is_set()
+
+    def restart(self):
+        self.satus = True
+        if self.work() == '1':
+            return '1'
+
+    def work(self):
+        pass
+
+
 
     def run(self):
-        HOST = ''
-        PORT = 8089
+        try:
 
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print('Socket created')
+            HOST = ''
+            PORT = 8089
 
-        s.bind((HOST, PORT))
-        print('Socket bind complete')
-        s.listen(10)
-        print('Socket now listening')
+            self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            print('Socket created')
 
-        conn, addr = s.accept()
+            self.s.bind((HOST, PORT))
+            print('Socket bind complete')
+            self.s.listen(10)
+            print('Socket now listening')
 
-        data = b''
-        payload_size = struct.calcsize("L")
+            self.conn, addr = self.s.accept()
+
+            data = b''
+            payload_size = struct.calcsize("L")
 
 
+            while True:
+                start_time = time.time()
+                print('Is alive at ' + str(start_time))
+                if self.new_source_status == 'preinitialize':
+                    print('preinitialize status')
+                    continue
+                elif self.new_source_status == 'reinitialize':
+                    try:
+                        self.conn.close()
+                        self.s.close()
+                    except BaseException as e:
+                        print('fail in closing socket')
+                        print(e)
 
-        while True:
-            start_time = time.time()
+                    print('reinitialize socket')
+                    HOST = ''
+                    PORT = 8089
 
-            try:
-                # Retrieve message size
-                while len(data) < payload_size:
-                    data += conn.recv(4096)
+                    self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    print('Socket re-created')
 
-                packed_msg_size = data[:payload_size]
-                data = data[payload_size:]
-                msg_size = struct.unpack("L", packed_msg_size)[0]  ### CHANGED
+                    self.s.bind((HOST, PORT))
+                    print('Socket re-bind complete')
+                    self.s.listen(10)
+                    print('Socket now re-listening')
 
-                # Retrieve all data based on message size
-                while len(data) < msg_size:
-                    data += conn.recv(4096)
+                    self.conn, addr = self.s.accept()
 
-                frame_data = data[:msg_size]
-                data = data[msg_size:]
+                    data = b''
+                    payload_size = struct.calcsize("L")
 
-                # Extract frame
-                frame_data = pickle.loads(frame_data)
-                frame = frame_data[0] #frame
-                data_face_list = []
-                for (name, top, right, bottom, left) in frame_data[1]:
-                    face_only = frame[left:top, right:bottom]
-                    data_face_list.append([name, face_only])
+                    self.new_source_status = 'initialize'
+                else:
+                    pass
+                try:
+                    # Retrieve message size
+                    while len(data) < payload_size:
+                        # print('Retrieve message size')
+                        data += self.conn.recv(4096)
 
-                    # Draw a box around the face
-                    cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
+                    packed_msg_size = data[:payload_size]
+                    data = data[payload_size:]
+                    msg_size = struct.unpack("L", packed_msg_size)[0]  ### CHANGED
 
-                    # Draw a label with a name below the face
-                    cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
-                    font = cv2.FONT_HERSHEY_DUPLEX
-                    cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
-                main_queue.put(data_face_list)
-                h, w, ch = frame.shape
-                bytesPerLine = ch * w
-                convertToQtFormat = QImage(frame.data, w, h, bytesPerLine, QImage.Format_BGR888)
-                # p = convertToQtFormat.scaled(711, 631, Qt.KeepAspectRatio) unnecessary
-                self.changePixmap.emit(convertToQtFormat)
-                # print("--- %s seconds ---" % (time.time() - start_time))
-            except BaseException:
-                print('Exceprion')
+                    # Retrieve all data based on message size
+                    while len(data) < msg_size:
+                        # print('Retrieve message size')
+                        data += self.conn.recv(4096)
+
+                    frame_data = data[:msg_size]
+                    data = data[msg_size:]
+
+                    # Extract frame
+                    frame_data = pickle.loads(frame_data)
+                    frame = frame_data[0] #frame
+                    data_face_list = []
+                    if not len(frame_data[1]) == 0:
+                        for (name, top, right, bottom, left) in frame_data[1]:
+                            face_only = frame[left:top, right:bottom]
+                            data_face_list.append([name, face_only])
+
+                            # Draw a box around the face
+                            cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
+
+                            # Draw a label with a name below the face
+                            cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
+                            font = cv2.FONT_HERSHEY_DUPLEX
+                            cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
+                    if not len(data_face_list) == 0:
+                        main_queue.put(data_face_list)
+                    h, w, ch = frame.shape
+                    bytesPerLine = ch * w
+                    convertToQtFormat = QImage(frame.data, w, h, bytesPerLine, QImage.Format_BGR888)
+                    # p = convertToQtFormat.scaled(711, 631, Qt.KeepAspectRatio) unnecessary
+                    self.changePixmap.emit(convertToQtFormat)
+                    # print("--- %s seconds ---" % (time.time() - start_time))
+                except BaseException as e:
+                    print('Exceprion')
+                    print(e)
+            print('while end')
+        except BaseException as e:
+            print('exception')
+            print(e)
+        finally:
+            print('FDFSDFSDFSDFSDF')
 
 class CurrentProgram(QtWidgets.QMainWindow):
     def __init__(self):
@@ -96,9 +161,9 @@ class CurrentProgram(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.init_camera_buttons()
-        th = Thread(self)
-        th.changePixmap.connect(self.setImage)
-        th.start()
+        self.th = Thread(self)
+        self.th.changePixmap.connect(self.setImage)
+        self.th.start()
 
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.delete_face)
@@ -109,18 +174,23 @@ class CurrentProgram(QtWidgets.QMainWindow):
         self.timer2.start(1000)
 
     def delete_face(self):
-        print('delete_face')
+        # print('run then fin')
+        # print(self.th.isRunning())
+        # print(self.th.isFinished())
+        # print(self.th.isInterruptionRequested())
+
+        # print('delete_face')
         now = time.time()
         for k in list(main_widget_names):
             add_time = main_widget_names[k][0]
             widget = main_widget_names[k][1]
             if now - add_time >= 3:
-                print('delete')
+                # print('delete')
                 widget.setParent(None)
                 main_widget_names.pop(k)
 
     def add_face(self):
-        print('add_face')
+        # print('add_face')
         if not main_queue.empty():
             data = main_queue.get()
 
@@ -128,10 +198,10 @@ class CurrentProgram(QtWidgets.QMainWindow):
                 name = face[0]
                 frame = face[1]
                 widget = main_widget_names.get(name)
-                print('widget')
+                # print('widget')
                 print(widget)
                 if widget is None:
-                    print('not find')
+                    # print('not find')
                     self.add_new_face(name, frame)
 
     @pyqtSlot(QImage)
@@ -168,17 +238,23 @@ class CurrentProgram(QtWidgets.QMainWindow):
 
 
     def button_released(self):
-        api = ServerApi('http://127.0.0.1:5000')
+        self.th.new_source_status = 'preinitialize'
 
+        api = ServerApi('http://127.0.0.1:5000')
         sending_button = self.sender()
-        res = api.get('/streaming/' + str(sending_button.property('id').get('ip')))
+        res = api.get('/streaming/' + str(sending_button.property('id').get('id')))
+        self.th.new_source_status = 'reinitialize'
+
 
         print('%s Clicked!' % str(sending_button.objectName()))
         print('%s Clicked!' % str(sending_button.property('id')))
+        # self.th.continue_thread()
+
+
 
 
     def add_new_face(self, person_name, frame):
-        print('added face')
+        # print('added face')
         person_widget = QtWidgets.QWidget(self.ui.faces_scroll_area_widget_contents)
         person_widget.setObjectName(person_name)
         verticalLayout_2 = QtWidgets.QVBoxLayout(person_widget)

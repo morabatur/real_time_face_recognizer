@@ -1,90 +1,59 @@
-# import sys
-# import threading
-# import time
-# import pickle
-# import socket
-# import struct
-#
-# import cv2
-#
-# from client.ua.nules.api import ServerApi
-# from PyQt5 import QtCore
-# from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
-# from PyQt5.QtGui import QImage, QPixmap
-#
-# from test_ui import Ui_MainWindow
-# from PyQt5 import QtWidgets
-#
-# from queue import Queue
-#
-# class CurrentProgramUI(QtWidgets.QMainWindow):
-#     def on_timer(self):
-#         print('HERE')
-#         self.ui.label.setParent(None)
-#
-#         if self.ui.label.parent() is None:
-#             print('non')
-#             _translate = QtCore.QCoreApplication.translate
-#
-#             label = QtWidgets.QLabel(self.ui.centralwidget)
-#             label.setGeometry(QtCore.QRect(330, 270, 55, 16))
-#             label.setObjectName("label")
-#
-#             label.setText(_translate("MainWindow", "TextLabel"))
-#             print('end')
-#
-#     def __init__(self):
-#         super(CurrentProgramUI, self).__init__()
-#         self.ui = Ui_MainWindow()
-#         self.ui.setupUi(self)
-#         # self.timer = QtCore.QTimer()
-#         # self.timer.timeout.connect(self.on_timer)
-#         # self.timer.start(1000)
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-# app = QtWidgets.QApplication([])
-# application = CurrentProgramUI()
-#
-# application.show()
-#
-# sys.exit(app.exec())
+import sys
+import threading
 import time
+import pickle
+import socket
+import struct
 
-my_dict = {}
-my_tim = time.time()
-time.sleep(2)
-my_dict['1'] = my_tim
-my_dict['2'] = time.time()
-my_dict['3'] = time.time()
+import cv2
 
-# def has_low_price(key):
-#     print('here')
-#     return time.time() - my_dict[key] >= 2
-#
-# map(lambda k: my_dict.pop(k) filter(has_low_price, my_dict.keys())
 
-now = time.time()
-for k in list(my_dict):
-    v = my_dict[k]
-    if now - v >= 2:
-        print('delete')
-        my_dict.pop(k)
+try:
 
 
 
-for k, v in my_dict.items():
-    print(k)
-    print(v)
+    HOST = ''
+    PORT = 8089
 
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    print('Socket created')
 
+    s.bind((HOST, PORT))
+    print('Socket bind complete')
+    s.listen(10)
+    print('Socket now listening')
 
+    conn, addr = s.accept()
 
+    data = b''
+    payload_size = struct.calcsize("L")
+
+    while True:
+        start_time = time.time()
+        print('Is alive')
+        try:
+
+            # Retrieve message size
+            while len(data) < payload_size:
+                data += conn.recv(4096)
+
+            packed_msg_size = data[:payload_size]
+            data = data[payload_size:]
+            msg_size = struct.unpack("L", packed_msg_size)[0]  ### CHANGED
+
+            # Retrieve all data based on message size
+            while len(data) < msg_size:
+                data += conn.recv(4096)
+
+            frame_data = data[:msg_size]
+            data = data[msg_size:]
+
+            # Extract frame
+            frame_data = pickle.loads(frame_data)
+            frame = frame_data[0]  # frame
+            cv2.imshow('f', frame)
+        except BaseException:
+            print('Exceprion')
+    print('while end')
+except BaseException:
+    print('exception')

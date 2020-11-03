@@ -11,6 +11,11 @@ class UdpSender(object):
         self.clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.clientsocket.connect((ip, port))
 
+    # def __new__(cls):
+    #     if not hasattr(cls, 'instance'):
+    #         cls.instance = super(UdpSender, cls).__new__(cls)
+    #     return cls.instance
+
     def send_data(self, info: object):
         # Serialize frame
         data = pickle.dumps(info)
@@ -25,5 +30,8 @@ class UdpSender(object):
             print('EXCEPRION, try reconnect')
             time.sleep(3)
             self.clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.clientsocket.connect((self.ip, self.port))
+            try:
+                self.clientsocket.connect((self.ip, self.port))
+            except BaseException as e:
+                print(e)
 
