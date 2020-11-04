@@ -1,15 +1,15 @@
 from client.ua.nules.api import ServerApi
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
+from PyQt5.QtCore import Qt
 
 
 class CameraButtonManager(object):
-    def __init__(self, horizontalLayout, camera_scroll_area_widget_contents, main_self):
+    def __init__(self, horizontalLayout: QtWidgets.QHBoxLayout, camera_scroll_area_widget_contents, main_self):
         self.main_self = main_self
         self.horizontalLayout = horizontalLayout
         self.camera_scroll_area_widget_contents = camera_scroll_area_widget_contents
         self.api = ServerApi('http://127.0.0.1:5000')
-
 
     def init_camera_buttons(self):
 
@@ -19,22 +19,17 @@ class CameraButtonManager(object):
             self.addButton(camera)
 
         spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem1.setAlignment(Qt.AlignRight)
         self.horizontalLayout.addItem(spacerItem1)
 
 
     def delete_button(self, camera_id):
-        widget = self.horizontalLayout.findChild(QtWidgets.QWidget, camera_id)
+        widget = self.camera_scroll_area_widget_contents.findChild(QtWidgets.QWidget, camera_id)
         api = ServerApi('http://127.0.0.1:5000')
         resp = api.rtsp_finish(camera_id)
 
         if resp.status_code == 200:
             widget.setParent(None)
-
-
-
-
-
-
 
     def addButton(self, camera):
         api = ServerApi('http://127.0.0.1:5000')
@@ -42,6 +37,7 @@ class CameraButtonManager(object):
         _translate = QtCore.QCoreApplication.translate
         camera_widget = QtWidgets.QWidget(self.camera_scroll_area_widget_contents)
         camera_widget.setObjectName(str(camera.get('id')))
+        print('camera name ', str(camera.get('id')))
 
         horizontalLayout_3 = QtWidgets.QHBoxLayout(camera_widget)
 
@@ -67,8 +63,6 @@ class CameraButtonManager(object):
         else:
             camera_rtsp_buttom.setText(_translate("MainWindow", "Stop stream"))
 
-
-
     def rtsp_released(self):
 
         sending_button = self.main_self.sender()
@@ -92,6 +86,3 @@ class CameraButtonManager(object):
         sending_button = self.main_self.sender()
         res = api.get('/streaming/' + str(sending_button.property('id').get('id')))
         self.main_self.new_source_status = 'reinitialize'
-
-
-

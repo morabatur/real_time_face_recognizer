@@ -45,7 +45,12 @@ class RstpThreadRunner(object):
             return 'cant find this thread ' + str(thread_name)
 
     def stop_rstp_thread(self, thread_name):
-        self.threads_id.get(str(thread_name)).stop()
+        if str(thread_name) in self.threads_id:
+            self.threads_id.get(str(thread_name)).stop()
+            return 'stopped'
+        else:
+            return 'not foud'
+
 
     def rtrsp_status(self) -> list:
         status = []

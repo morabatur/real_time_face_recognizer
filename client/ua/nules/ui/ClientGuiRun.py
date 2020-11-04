@@ -7,17 +7,16 @@ import struct
 
 import cv2
 
-from client.ua.nules.api import ServerApi
-from PyQt5 import QtCore, QtGui
-from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot, Qt
+from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QImage, QPixmap
+from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QFileDialog
 
 from client.ua.nules.ui.ButtonManager import CameraButtonManager
 from client.ua.nules.ui.CameraList import CameraList
 from client.ua.nules.ui.FacesList import FacesList
 from client.ua.nules.ui.GUI import Ui_MainWindow
 from client.ua.nules.ui.CameraDialog import CameraDialog
-from PyQt5 import QtWidgets
 
 from queue import Queue
 
@@ -157,7 +156,7 @@ class Thread(QThread):
             print('exception')
             print(e)
         finally:
-            print('FDFSDFSDFSDFSDF')
+            print('Critical exception')
 
 class CurrentProgram(QtWidgets.QMainWindow):
     def __init__(self):
@@ -169,16 +168,22 @@ class CurrentProgram(QtWidgets.QMainWindow):
         self.th = Thread(self)
         self.th.changePixmap.connect(self.setImage)
         self.th.start()
-        cameraDialog = CameraDialog()
-        cameraList = CameraList()
+        cameraDialog = CameraDialog(self.button_manager)
+        cameraList = CameraList(self.button_manager)
         facesList = FacesList()
         self.ui.actionAdd.triggered.connect(lambda : cameraDialog.show() )
-        self.ui.actionDelete.triggered.connect(lambda : cameraList.show() )
+        self.ui.actionDelete.triggered.connect(lambda : cameraList.reshow() )
         self.ui.actionShow_faces.triggered.connect(lambda : facesList.show() )
+        self.ui.actionAdd_face.triggered.connect(self.test)
 
         # self.timer = QtCore.QTimer()
         # self.timer.timeout.connect(self.delete_face)
         # self.timer.start(2000)
+
+    def test(self):
+        fname = QFileDialog.getOpenFileName(self, 'Open file',
+                                            'c:\\', "Image files (*.jpg *jpeg *.png)")
+        file_path = fname[0]
 
 
     @pyqtSlot(QImage)

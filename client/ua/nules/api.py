@@ -27,3 +27,8 @@ class ServerApi(object):
         url = self.host + '/rtsp/status/' + str(camera_id)
         response = requests.get(url)
         return response
+
+    def delete_camera(self, camera_id):
+        url = self.host + '/camera/' + str(camera_id)
+        response = requests.delete(url)
+        return response

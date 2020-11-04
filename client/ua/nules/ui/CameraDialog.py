@@ -1,16 +1,18 @@
 import requests
 
-from server.model.Camera import Camera, CameraSchema
+from client.ua.nules.ui.ButtonManager import CameraButtonManager
+from server.model.Camera import CameraSchema, Camera
 from client.ua.nules.ui.CameraGUI import Ui_Dialog
 
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtWidgets
 
 class CameraDialog(QtWidgets.QDialog):
-    def __init__(self):
+    def __init__(self, button_manager: CameraButtonManager):
         super(CameraDialog, self).__init__()
         self.ui = Ui_Dialog()
         self.ui.setupUi(self)
+        self.button_manager = button_manager
         self.ui.buttonBox.accepted.connect(self.accept_data)
         self.ui.buttonBox.rejected.connect(self.reject_data)
         self.camera_schema = CameraSchema()
@@ -22,10 +24,6 @@ class CameraDialog(QtWidgets.QDialog):
         password = self.ui.password_lineEdit.text()
         rtsp_path = self.ui.rtsp_lineEdit.text()
 
-        # new_camera = Camera(ip, port, user, password, rtsp_path)
-        # json_data = self.camera_schema.jsonify(new_camera)
-        # print(json_data)
-
         r = requests.post('http://127.0.0.1:5000/camera', json={'ip': ip,
                                                            'port': port,
                                                            'user': user,
@@ -33,6 +31,10 @@ class CameraDialog(QtWidgets.QDialog):
                                                            'rtsp_path': rtsp_path})
         print('status:')
         print(r.status_code)
+        new_camera = r.json()
+        self.button_manager.addButton(new_camera)
+
+
 
         self.close()
 
