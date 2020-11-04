@@ -16,6 +16,7 @@ class CameraList(QtWidgets.QDialog):
         self.camera_schema = CameraSchema()
         api = ServerApi('http://127.0.0.1:5000')
         res = api.get('/camera')
+        self.ui.listWidget.clicked.connect(self.click_item)
 
         for camera in res:
             item = QtWidgets.QListWidgetItem()
@@ -34,6 +35,12 @@ class CameraList(QtWidgets.QDialog):
         r = requests.get('http://127.0.0.1:5000/camera')
         print('status:')
         print(r.status_code)
+
+    def click_item(self):
+
+        print('camera id ', self.ui.listWidget.currentItem().statusTip())
+
+
 
 
 

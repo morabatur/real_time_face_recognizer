@@ -19,10 +19,6 @@ from client.ua.nules.ui.GUI import Ui_MainWindow
 from client.ua.nules.ui.CameraDialog import CameraDialog
 from PyQt5 import QtWidgets
 
-from queue import Queue
-
-main_queue = Queue()
-main_widget_names = dict()
 
 
 
@@ -128,11 +124,8 @@ class Thread(QThread):
                     # Extract frame
                     frame_data = pickle.loads(frame_data)
                     frame = frame_data[0] #frame
-                    data_face_list = []
                     if not len(frame_data[1]) == 0:
                         for (name, top, right, bottom, left) in frame_data[1]:
-                            face_only = frame[left:top, right:bottom]
-                            data_face_list.append([name, face_only])
 
                             # Draw a box around the face
                             cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
@@ -141,12 +134,10 @@ class Thread(QThread):
                             cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
                             font = cv2.FONT_HERSHEY_DUPLEX
                             cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
-                    if not len(data_face_list) == 0:
-                        main_queue.put(data_face_list)
+
                     h, w, ch = frame.shape
                     bytesPerLine = ch * w
                     convertToQtFormat = QImage(frame.data, w, h, bytesPerLine, QImage.Format_BGR888)
-                    # p = convertToQtFormat.scaled(711, 631, Qt.KeepAspectRatio) unnecessary
                     self.changePixmap.emit(convertToQtFormat)
                     # print("--- %s seconds ---" % (time.time() - start_time))
                 except BaseException as e:
