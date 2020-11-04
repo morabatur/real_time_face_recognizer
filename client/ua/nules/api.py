@@ -22,3 +22,8 @@ class ServerApi(object):
         url = self.host + '/rtsp/finish/' + str(camera_id)
         response = requests.get(url)
         return response
+
+    def rtsp_item_status(self, camera_id):
+        url = self.host + '/rtsp/status/' + str(camera_id)
+        response = requests.get(url)
+        return response

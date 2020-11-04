@@ -44,7 +44,6 @@ class RstpThreadRunner(object):
             print('cant find this thread ' + str(thread_name))
             return 'cant find this thread ' + str(thread_name)
 
-
     def stop_rstp_thread(self, thread_name):
         self.threads_id.get(str(thread_name)).stop()
 
@@ -55,3 +54,13 @@ class RstpThreadRunner(object):
             status.append(item_satus)
 
         return status
+
+    def rtrsp_item_status(self, connect_url):
+        name = 'null'
+        status = 'null'
+        if str(connect_url) in self.threads_id:
+            thread = self.threads_id[str(connect_url)]
+            name = connect_url
+            status = thread.stopped()
+
+        return {'thread_name': name, 'stopped': status}

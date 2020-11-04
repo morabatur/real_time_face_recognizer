@@ -12,6 +12,7 @@ from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot, Qt
 from PyQt5.QtGui import QImage, QPixmap
 
+from client.ua.nules.ui.ButtonManager import CameraButtonManager
 from client.ua.nules.ui.CameraList import CameraList
 from client.ua.nules.ui.FacesList import FacesList
 from client.ua.nules.ui.GUI import Ui_MainWindow
@@ -163,7 +164,8 @@ class CurrentProgram(QtWidgets.QMainWindow):
         super(CurrentProgram, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.init_camera_buttons()
+        self.button_manager = CameraButtonManager(self.ui.horizontalLayout_2, self.ui.camera_scroll_area_widget_contents, self)
+        self.button_manager.init_camera_buttons()
         self.th = Thread(self)
         self.th.changePixmap.connect(self.setImage)
         self.th.start()
@@ -182,101 +184,6 @@ class CurrentProgram(QtWidgets.QMainWindow):
     @pyqtSlot(QImage)
     def setImage(self, image):
         self.ui.frame_label.setPixmap(QPixmap.fromImage(image))
-
-
-    def init_camera_buttons(self):
-        api = ServerApi('http://127.0.0.1:5000')
-        res = api.get('/camera')
-
-        for camera in res:
-            self.addButton(camera)
-
-        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.ui.horizontalLayout_2.addItem(spacerItem1)
-
-
-    def addButton(self, camera):
-        _translate = QtCore.QCoreApplication.translate
-        camera_widget = QtWidgets.QWidget(self.ui.camera_scroll_area_widget_contents)
-
-        horizontalLayout_3 = QtWidgets.QHBoxLayout(camera_widget)
-
-        camera_button = QtWidgets.QPushButton(camera_widget)
-        camera_button.setObjectName("camera_button" + camera.get('ip'))
-        camera_button.setProperty('id', camera)
-        camera_button.released.connect(self.button_released)
-
-        camera_rtsp_buttom = QtWidgets.QPushButton(camera_widget)
-        camera_rtsp_buttom.setObjectName("camera_rtsp_buttom" + camera.get('ip'))
-        camera_rtsp_buttom.setProperty('id', camera)
-        camera_rtsp_buttom.released.connect(self.rtsp_released)
-
-        horizontalLayout_3.addWidget(camera_rtsp_buttom)
-        horizontalLayout_3.addWidget(camera_button)
-
-        self.ui.horizontalLayout_2.addWidget(camera_widget)
-        camera_button.setText(_translate("MainWindow", "View\n" + camera.get('ip')))
-        camera_rtsp_buttom.setText(_translate("MainWindow", "Start stream"))
-
-
-    def rtsp_released(self):
-
-        sending_button = self.sender()
-        api = ServerApi('http://127.0.0.1:5000')
-
-        if sending_button.text() == 'Start stream':
-            resp = api.rtsp_start(sending_button.property('id').get('id'))
-            print('start rtsp ', str(resp.status_code))
-            if resp.status_code == 200 or resp.status_code == '200':
-                sending_button.setText('Stop stream')
-        else:
-            resp = api.rtsp_finish(sending_button.property('id').get('id'))
-            print('start rtsp ', str(resp.status_code))
-            if resp.status_code == 200 or resp.status_code == '200':
-                sending_button.setText('Start stream')
-
-    def button_released(self):
-        self.th.new_source_status = 'preinitialize'
-
-        api = ServerApi('http://127.0.0.1:5000')
-        sending_button = self.sender()
-        res = api.get('/streaming/' + str(sending_button.property('id').get('id')))
-        self.th.new_source_status = 'reinitialize'
-
-
-    def add_new_face(self, person_name, frame):
-        # print('added face')
-        person_widget = QtWidgets.QWidget(self.ui.faces_scroll_area_widget_contents)
-        person_widget.setObjectName(person_name)
-        verticalLayout_2 = QtWidgets.QVBoxLayout(person_widget)
-        name_lbl = QtWidgets.QLabel(person_widget)
-        name_lbl.setText(person_name)
-        verticalLayout_2.addWidget(name_lbl)
-        self.ui.verticalLayout.addWidget(person_widget)
-
-        # h, w, ch = frame.shape
-        # bytesPerLine = ch * w
-        # convertToQtFormat = QImage(frame.data, w, h, bytesPerLine, QImage.Format_BGR888)
-        # p = convertToQtFormat.scaled(711, 631, Qt.KeepAspectRatio) unnecessary
-        # self.changePixmap.emit(convertToQtFormat)
-        # pixmap01 = QtGui.QPixmap.fromImage(convertToQtFormat)
-        # pixmap_image = QtGui.QPixmap(pixmap01)
-        #
-        #
-        # person_widget = QtWidgets.QWidget(self.ui.faces_scroll_area_widget_contents)
-        # verticalLayout_2 = QtWidgets.QVBoxLayout(person_widget)
-        # face_img = QtWidgets.QLabel(person_widget)
-        # face_img.setMinimumSize(QtCore.QSize(151, 101))
-        # face_img.setAlignment(QtCore.Qt.AlignCenter)
-        # face_img.setPixmap(pixmap_image)
-        # verticalLayout_2.addWidget(face_img)
-        # name_lbl = QtWidgets.QLabel(person_widget)
-        # name_lbl.setText(person_name)
-        # verticalLayout_2.addWidget(name_lbl)
-        # self.ui.verticalLayout.addWidget(person_widget)
-
-        main_widget_names[person_name] = [time.time(), person_widget]
-
 
 
 app = QtWidgets.QApplication([])
