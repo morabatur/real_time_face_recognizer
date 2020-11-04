@@ -69,3 +69,9 @@ class RstpThreadRunner(object):
             status = thread.stopped()
 
         return {'thread_name': name, 'stopped': status}
+
+
+    def reload_all_model(self):
+        for key, thread_value in self.threads_id.items():
+            thread_value.reload_model()
+

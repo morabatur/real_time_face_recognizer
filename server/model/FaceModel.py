@@ -47,8 +47,18 @@ class FaceModel(object):
 
         return known_face_names, known_face_encodings
 
-    # TODO implement function
+
     def reload_model(self):
-        test = []
+        trainer_images_dir = 'C:/Users/rcher/PycharmProjects/diploma/trainer_images'
+        face_names_pickle = '%s/known_face_names.pickle' % trainer_images_dir
+        face_encodings_pickle = '%s/known_face_encodings.pickle' % trainer_images_dir
+        known_face_names, known_face_encodings = self.grab_photos('%s' % trainer_images_dir)
+
+        with open(face_names_pickle, 'wb') as f:
+            pickle.dump(known_face_names, f)
+        with open(face_encodings_pickle, 'wb') as f:
+            pickle.dump(known_face_encodings, f)
+
+        return known_face_names, known_face_encodings
 
 

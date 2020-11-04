@@ -110,5 +110,11 @@ def rtsp_item_status(camera_id):
     return jsonify(thread_runner.rtrsp_item_status(camera.get_connect_url()))
 
 
+@app.route('/rtsp/reload-model', methods=['GET'])
+def rtsp_reload():
+    thread_runner.reload_all_model()
+    return jsonify('Done')
+
+
 if __name__ == '__main__':
     app.run(debug=True)

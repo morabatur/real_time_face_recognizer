@@ -22,6 +22,7 @@ class RstpThread(Thread):
         self.face_model = face_model
         self.sender_manager = sender_manager
         self.udp_sender = udp_sender
+        self.known_face_names, self.known_face_encodings = self.face_model.load()
         print('init camera ' + str(camera.get_connect_url()) + ' in thread ' + str(threading.current_thread().ident))
 
     def stop(self):
@@ -33,11 +34,12 @@ class RstpThread(Thread):
     def stopped(self):
         return self._stop_event.is_set()
 
-    def run(self):
+    def reload_model(self):
+        self.known_face_names, self.known_face_encodings = self.face_model.reload_model()
 
+    def run(self):
         video_capture = cv2.VideoCapture(self.camera.get_connect_url())
 
-        known_face_names, known_face_encodings = self.face_model.load()
         print('loaded model in ' + str(self.name))
         while (True):
             if self.stopped():
@@ -64,14 +66,14 @@ class RstpThread(Thread):
             if not len(face_encodings) == 0:
                 for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
                     # See if the face is a match for the known face(s)
-                    matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
+                    matches = face_recognition.compare_faces(self.known_face_encodings, face_encoding)
 
                     # Or instead, use the known face with the smallest distance to the new face
-                    face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
+                    face_distances = face_recognition.face_distance(self.known_face_encodings, face_encoding)
                     best_match_index = np.argmin(face_distances)
                     name = 'undefined'
                     if matches[best_match_index]:
-                        name = known_face_names[best_match_index]
+                        name = self.known_face_names[best_match_index]
                     if self.name == 'rtsp://MyHomeRoman:Zibenaht300078789831a@192.168.1.45/stream1':
                         print('detected person: ' + name + 'in thread ' + str(self.name))
                     face_coordinates.append((name, top, right, bottom, left))
