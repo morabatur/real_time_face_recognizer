@@ -15,6 +15,10 @@ class FacesList(QtWidgets.QDialog):
         self.ui.setupUi(self)
         self.ui.pushButton.clicked.connect(self.accept_data)
 
+
+
+    def load_data(self):
+        self.ui.listWidget.clear()
         image_dir = 'C:/Users/rcher/PycharmProjects/diploma/trainer_images'
         for root, dirs, files in os.walk(image_dir):
             for dir in dirs:
@@ -30,3 +34,7 @@ class FacesList(QtWidgets.QDialog):
                     path = os.path.join(root, file)
                     name_for_photo = path.split("\\")[-1]
                     cv2.imshow(name_for_photo, cv2.imread(path))
+
+    def reshow(self):
+        self.load_data()
+        self.show()

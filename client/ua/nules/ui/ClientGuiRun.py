@@ -1,3 +1,5 @@
+import os
+import shutil
 import sys
 import threading
 import time
@@ -12,6 +14,7 @@ from PyQt5.QtGui import QImage, QPixmap
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QFileDialog
 
+from client.ua.nules.ui.AddFaceDialog import AddFaceDialog
 from client.ua.nules.ui.ButtonManager import CameraButtonManager
 from client.ua.nules.ui.CameraList import CameraList
 from client.ua.nules.ui.FacesList import FacesList
@@ -171,10 +174,11 @@ class CurrentProgram(QtWidgets.QMainWindow):
         cameraDialog = CameraDialog(self.button_manager)
         cameraList = CameraList(self.button_manager)
         facesList = FacesList()
+        faceDialog = AddFaceDialog()
         self.ui.actionAdd.triggered.connect(lambda : cameraDialog.show() )
         self.ui.actionDelete.triggered.connect(lambda : cameraList.reshow() )
-        self.ui.actionShow_faces.triggered.connect(lambda : facesList.show() )
-        self.ui.actionAdd_face.triggered.connect(self.test)
+        self.ui.actionShow_faces.triggered.connect(lambda : facesList.reshow() )
+        self.ui.actionAdd_face.triggered.connect(lambda : faceDialog.reshow())
 
         # self.timer = QtCore.QTimer()
         # self.timer.timeout.connect(self.delete_face)
@@ -183,7 +187,18 @@ class CurrentProgram(QtWidgets.QMainWindow):
     def test(self):
         fname = QFileDialog.getOpenFileName(self, 'Open file',
                                             'c:\\', "Image files (*.jpg *jpeg *.png)")
+
         file_path = fname[0]
+        new_folder = 'testfolder'
+        trainer_images_dir = 'C:/Users/rcher/PycharmProjects/diploma/trainer_images'
+        create_folder = os.path.join(trainer_images_dir, new_folder)
+        print(create_folder)
+        os.mkdir(create_folder)
+        if os.path.exists(create_folder):
+            shutil.copyfile(file_path, create_folder + '/file_copy.jpg')
+        else:
+            print('cant create')
+
 
 
     @pyqtSlot(QImage)
