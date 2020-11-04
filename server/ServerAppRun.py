@@ -104,11 +104,6 @@ def finish_rtsp_streaming(camera_id):
 def rtsp_status():
     return jsonify(thread_runner.rtrsp_status())
 
-@app.route('/rtsp/status/<camera_id>', methods=['GET'])
-def rtsp_item_status(camera_id):
-    camera = Camera.query.get(camera_id)
-    return jsonify(thread_runner.rtrsp_item_status(camera.get_connect_url()))
-
 
 if __name__ == '__main__':
     app.run(debug=True)
